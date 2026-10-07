@@ -1,76 +1,5 @@
-// 問題を追加するときは、この配列に同じ形式のオブジェクトを追加してください。
-const questions = [
-  {
-    sentence: "The company plans to (　　　) a new service for international customers next spring.",
-    choices: ["launch", "borrow", "refuse", "solve"],
-    answer: 0,
-    explanation: "launch は「（商品・サービスなどを）開始する、発売する」という意味です。",
-    translation: "その会社は来春、海外の顧客向けに新しいサービスを開始する予定です。"
-  },
-  {
-    sentence: "Mika was (　　　) to hear that she had passed the difficult exam.",
-    choices: ["delighted", "ordinary", "separate", "patient"],
-    answer: 0,
-    explanation: "be delighted to ～ で「～して大喜びする」という表現です。",
-    translation: "ミカは難しい試験に合格したと聞いて大喜びしました。"
-  },
-  {
-    sentence: "The city is trying to (　　　) the amount of plastic waste by encouraging recycling.",
-    choices: ["reduce", "pretend", "compare", "deliver"],
-    answer: 0,
-    explanation: "reduce は「量や数を減らす」という意味です。reduce the amount of ～ で「～の量を減らす」です。",
-    translation: "その市はリサイクルを奨励することで、プラスチックごみの量を減らそうとしています。"
-  },
-  {
-    sentence: "Please (　　　) that all the windows are closed before you leave the building.",
-    choices: ["make sure", "take place", "give up", "look after"],
-    answer: 0,
-    explanation: "make sure that ～ は「～であることを確かめる」という頻出表現です。",
-    translation: "建物を出る前に、すべての窓が閉まっていることを確認してください。"
-  },
-  {
-    sentence: "Because of the heavy snow, several flights were (　　　) until the next morning.",
-    choices: ["postponed", "improved", "produced", "invited"],
-    answer: 0,
-    explanation: "postpone は「延期する」という意味です。ここでは受け身で「延期された」となります。",
-    translation: "大雪のため、いくつかの便は翌朝まで延期されました。"
-  },
-  {
-    sentence: "This medicine is very (　　　) in treating the symptoms of a cold.",
-    choices: ["effective", "curious", "similar", "responsible"],
-    answer: 0,
-    explanation: "effective は「効果的な」という意味です。be effective in ～ing で「～するのに効果がある」です。",
-    translation: "この薬は風邪の症状を治療するのにとても効果的です。"
-  },
-  {
-    sentence: "Ken decided to (　　　) the job offer because he wanted to study abroad.",
-    choices: ["turn down", "bring up", "put away", "call on"],
-    answer: 0,
-    explanation: "turn down は「申し出などを断る」という句動詞です。",
-    translation: "ケンは留学したかったので、その仕事の申し出を断ることにしました。"
-  },
-  {
-    sentence: "The museum has a large (　　　) of paintings from the nineteenth century.",
-    choices: ["collection", "direction", "condition", "population"],
-    answer: 0,
-    explanation: "collection は「収集品、コレクション」です。a collection of ～ で「～のコレクション」となります。",
-    translation: "その美術館には19世紀の絵画が多数収蔵されています。"
-  },
-  {
-    sentence: "It is (　　　) that the train will arrive late because of the storm.",
-    choices: ["likely", "aware", "equal", "private"],
-    answer: 0,
-    explanation: "It is likely that ～ は「～する可能性が高い」という表現です。",
-    translation: "嵐のため、その電車は遅れて到着する可能性が高いです。"
-  },
-  {
-    sentence: "The teacher asked the students to (　　　) their opinions during the discussion.",
-    choices: ["express", "destroy", "prevent", "recognize"],
-    answer: 0,
-    explanation: "express an opinion で「意見を述べる、表現する」という意味です。",
-    translation: "先生は生徒たちに、話し合いの中で自分の意見を述べるよう求めました。"
-  }
-];
+const questionBank = window.QUESTION_BANK || [];
+let questions = [];
 
 const screens = {
   home: document.querySelector("#homeScreen"),
@@ -120,6 +49,7 @@ function showScreen(name) {
 }
 
 function startQuiz() {
+  questions = [...questionBank].sort(() => Math.random() - 0.5).slice(0, 10);
   currentQuestion = 0;
   score = 0;
   mistakes = [];
