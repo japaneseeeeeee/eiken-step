@@ -42,6 +42,7 @@ let quizTotals = {
   correct: Number(savedQuiz.correct) || 0,
   bestScore: Number(savedQuiz.bestScore) || 0
 };
+let lastQuestionIds = Array.isArray(savedQuiz.lastQuestionIds) ? savedQuiz.lastQuestionIds : [];
 let currentQuestion = 0;
 let score = 0;
 let mistakes = [];
@@ -55,12 +56,30 @@ function showScreen(name) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+function shuffle(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function pickRandomQuestionIds(count) {
+  const allIds = questionBank.map((_, index) => index);
+  const previousIds = new Set(lastQuestionIds);
+  const freshIds = allIds.filter((id) => !previousIds.has(id));
+  const pool = freshIds.length >= count ? freshIds : allIds;
+  return shuffle(pool).slice(0, Math.min(count, pool.length));
+}
+
 function saveSession() {
   const mistakeIds = mistakes.map((question) => questionBank.indexOf(question)).filter((id) => id >= 0);
   window.EikenProgress.updateSection(
     "quiz",
     {
       ...quizTotals,
+      lastQuestionIds,
       session: {
         questionIds,
         currentQuestion,
@@ -79,7 +98,8 @@ function saveSession() {
 }
 
 function startQuiz() {
-  questionIds = questionBank.map((_, index) => index).sort(() => Math.random() - 0.5).slice(0, 10);
+  questionIds = pickRandomQuestionIds(10);
+  lastQuestionIds = [...questionIds];
   questions = questionIds.map((id) => questionBank[id]);
   currentQuestion = 0;
   score = 0;
@@ -209,7 +229,7 @@ function renderResult() {
   quizTotals.bestScore = Math.max(quizTotals.bestScore, score);
   window.EikenProgress.updateSection(
     "quiz",
-    { ...quizTotals, session: null },
+    { ...quizTotals, lastQuestionIds, session: null },
     {
       href: "quiz.html",
       title: "4択問題をもう一度",

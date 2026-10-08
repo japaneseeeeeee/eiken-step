@@ -7,7 +7,7 @@
       updatedAt: null,
       lastActivity: null,
       vocabulary: { current: 0, total: 1500 },
-      quiz: { answered: 0, correct: 0, bestScore: 0, session: null },
+      quiz: { answered: 0, correct: 0, bestScore: 0, lastQuestionIds: [], session: null },
       listening: { current: 0, total: 115, mode: "practice", session: null },
       writing: { promptIndex: 0, drafts: {} }
     };
