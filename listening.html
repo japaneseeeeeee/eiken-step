@@ -1,4 +1,75 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#163c63"><title>リスニング｜EIKEN STEP</title><link rel="stylesheet" href="style.css"><script src="listening-data.js" defer></script><script src="audio.js" defer></script><script src="listening.js" defer></script></head><body>
-<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">E</span><span>EIKEN <strong>STEP</strong></span></a><span class="level-badge">リスニング</span></header><main class="subpage"><nav class="back-nav"><a href="index.html">トップへ戻る</a><span id="listenProgress">1 / 100</span></nav><section class="page-intro"><p class="eyebrow">LISTENING PRACTICE</p><h1>会話を聞いて答える</h1><p>音声は何度でも再生できます。内容に合う答えを選びましょう。</p></section>
-<article class="listening-card"><p id="listenNumber" class="question-number">QUESTION 01</p><button id="playAudio" class="audio-player"><span class="play-circle">▶</span><span><strong>会話を再生する</strong><small>録音済みの男女音声で再生</small></span></button><h2 id="listenQuestion"></h2><div id="listenChoices" class="choices"></div><div id="listenFeedback" class="feedback" hidden><strong id="listenResult"></strong><p id="listenExplanation"></p><details><summary>スクリプトと和訳を見る</summary><p id="listenScript"></p><p id="listenTranslation" class="translation"></p></details><button id="nextListen" class="primary-button next-button">次の問題へ</button></div></article>
-<section id="listenComplete" class="result-card mini-result" hidden><p class="eyebrow">COMPLETE</p><h1>リスニング完了！</h1><p id="listenScore"></p><div class="result-actions"><button id="retryListen" class="primary-button">もう一度</button><a class="secondary-button link-button" href="index.html">トップへ戻る</a></div></section></main><footer>© 2026 EIKEN STEP</footer></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#163c63">
+  <title>リスニング｜EIKEN STEP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="listening-data.js" defer></script>
+  <script src="audio.js" defer></script>
+  <script src="listening.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark">E</span><span>EIKEN <strong>STEP</strong></span></a>
+    <span class="level-badge">リスニング</span>
+  </header>
+
+  <main class="subpage">
+    <nav class="back-nav"><a href="index.html">トップへ戻る</a><span id="listenProgress">1 / 115</span></nav>
+
+    <section class="page-intro">
+      <p class="eyebrow">LISTENING PRACTICE</p>
+      <h1>英検2級形式で聞く</h1>
+      <p id="modeDescription">全115問を、解説を確認しながら何度でも練習できます。</p>
+      <div class="listening-mode-switch" role="group" aria-label="学習モード">
+        <button id="practiceMode" class="mode-button active" type="button">
+          <strong>練習モード</strong><small>全115問・再生自由</small>
+        </button>
+        <button id="mockMode" class="mode-button" type="button">
+          <strong>英検形式模試</strong><small>第1部15問＋第2部15問</small>
+        </button>
+      </div>
+    </section>
+
+    <article class="listening-card">
+      <div class="listening-question-head">
+        <p id="listenNumber" class="question-number">QUESTION 01</p>
+        <span id="listenPart" class="part-badge">第1部・対話</span>
+      </div>
+      <button id="playAudio" class="audio-player" type="button">
+        <span class="play-circle">▶</span>
+        <span><strong>音声を再生する</strong><small>英文と質問を続けて再生</small></span>
+      </button>
+      <p class="ai-audio-note">このページの英語音声はAIで生成しています。</p>
+      <p id="listenTimer" class="listen-timer" hidden></p>
+      <h2 id="listenQuestion"></h2>
+      <div id="listenChoices" class="choices"></div>
+      <div id="listenFeedback" class="feedback" hidden>
+        <strong id="listenResult"></strong>
+        <p id="listenExplanation"></p>
+        <details>
+          <summary>スクリプトと和訳を見る</summary>
+          <p id="listenScript"></p>
+          <p id="listenTranslation" class="translation"></p>
+        </details>
+        <button id="nextListen" class="primary-button next-button" type="button">次の問題へ</button>
+      </div>
+    </article>
+
+    <section id="listenComplete" class="result-card mini-result" hidden>
+      <p class="eyebrow">COMPLETE</p>
+      <h1>リスニング完了！</h1>
+      <p id="listenScore"></p>
+      <p id="listenScoreDetail" class="result-message"></p>
+      <div class="result-actions">
+        <button id="retryListen" class="primary-button" type="button">もう一度</button>
+        <a class="secondary-button link-button" href="index.html">トップへ戻る</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2026 EIKEN STEP</footer>
+</body>
+</html>

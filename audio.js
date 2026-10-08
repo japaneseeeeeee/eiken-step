@@ -27,7 +27,7 @@ window.EikenAudio = (() => {
     return voices.sort((a, b) => rankVoice(b, preferred) - rankVoice(a, preferred))[0] || null;
   }
 
-  function makeUtterance(text, kind, rate = 0.84) {
+  function makeUtterance(text, kind, rate = 0.78) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = kind === "male" ? "en-GB" : "en-US";
     utterance.rate = rate;
@@ -50,19 +50,27 @@ window.EikenAudio = (() => {
 
   function speak(text, options = {}) {
     stop();
-    synth.speak(makeUtterance(text, options.kind || "female", options.rate || 0.82));
+    synth.speak(makeUtterance(text, options.kind || "female", options.rate || 0.78));
   }
 
-  function speakDialogue(script) {
+  function speakDialogue(script, callbacks = {}) {
     synth.cancel();
-    const parts = [...script.matchAll(/(Woman|Man):\s*([\s\S]*?)(?=\s+(?:Woman|Man):|$)/g)];
+    const parts = [...script.matchAll(/(Woman|Man|Narrator):\s*([\s\S]*?)(?=\s+(?:Woman|Man|Narrator):|$)/g)];
     if (!parts.length) {
-      synth.speak(makeUtterance(script, "female", 0.82));
+      const utterance = makeUtterance(script, "female", 0.78);
+      utterance.addEventListener("end", () => callbacks.onEnd?.(), { once: true });
+      utterance.addEventListener("error", () => callbacks.onError?.(), { once: true });
+      synth.speak(utterance);
       return;
     }
-    parts.forEach((part) => {
+    parts.forEach((part, index) => {
       const kind = part[1] === "Man" ? "male" : "female";
-      synth.speak(makeUtterance(part[2].trim(), kind, 0.82));
+      const utterance = makeUtterance(part[2].trim(), kind, 0.78);
+      if (index === parts.length - 1) {
+        utterance.addEventListener("end", () => callbacks.onEnd?.(), { once: true });
+        utterance.addEventListener("error", () => callbacks.onError?.(), { once: true });
+      }
+      synth.speak(utterance);
     });
   }
 
@@ -72,8 +80,7 @@ window.EikenAudio = (() => {
     const sources = Array.isArray(paths) ? paths : [];
     if (!sources.length) {
       callbacks.onStart?.();
-      speakDialogue(script);
-      callbacks.onEnd?.();
+      speakDialogue(script, callbacks);
       return;
     }
 
@@ -86,7 +93,7 @@ window.EikenAudio = (() => {
       fallbackStarted = true;
       currentAudio = null;
       callbacks.onError?.();
-      speakDialogue(script);
+      speakDialogue(script, { onEnd: callbacks.onEnd });
     }
 
     function playNext() {
@@ -101,7 +108,10 @@ window.EikenAudio = (() => {
       index += 1;
       currentAudio = audio;
       audio.preload = "auto";
-      audio.addEventListener("ended", () => window.setTimeout(playNext, 180), { once: true });
+      audio.addEventListener("ended", () => {
+        const pause = index === sources.length - 1 ? (callbacks.pauseBeforeLast || 760) : 320;
+        window.setTimeout(playNext, pause);
+      }, { once: true });
       audio.addEventListener("error", fallback, { once: true });
       const started = audio.play();
       if (started?.catch) started.catch(fallback);
