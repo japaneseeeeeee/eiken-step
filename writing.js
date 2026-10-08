@@ -845,17 +845,39 @@ const prompts = [
 
 const $ = (selector) => document.querySelector(selector);
 let modelOpen = false;
+const savedWriting = window.EikenProgress.read().writing || {};
+const drafts = { ...(savedWriting.drafts || {}) };
+let activePromptIndex = Math.min(Math.max(Number(savedWriting.promptIndex) || 0, 0), prompts.length - 1);
 
 $("#promptSelect").innerHTML = prompts.map((_, index) => `<option value="${index}">お題 ${index + 1}</option>`).join("");
+$("#promptSelect").value = String(activePromptIndex);
+
+function saveWritingProgress() {
+  drafts[activePromptIndex] = $("#essay").value;
+  const completedDrafts = Object.values(drafts).filter((draft) => draft.trim()).length;
+  window.EikenProgress.updateSection(
+    "writing",
+    { promptIndex: activePromptIndex, drafts },
+    {
+      href: "writing.html?resume=1",
+      title: "ライティングの続き",
+      detail: `お題 ${activePromptIndex + 1}・下書き${completedDrafts}題保存`
+    }
+  );
+}
 
 function loadPrompt() {
-  const prompt = prompts[Number($("#promptSelect").value)];
+  activePromptIndex = Number($("#promptSelect").value);
+  const prompt = prompts[activePromptIndex];
   $("#writingTopic").textContent = prompt.topic;
   $("#writingPoints").innerHTML = prompt.points.map((point) => `<li>${point}</li>`).join("");
   $("#modelText").textContent = prompt.model;
+  $("#essay").value = drafts[activePromptIndex] || "";
   modelOpen = false;
   $("#modelAnswer").hidden = true;
   $("#modelToggle").textContent = "模範解答を見る";
+  count();
+  saveWritingProgress();
 }
 
 function count() {
@@ -867,7 +889,10 @@ function count() {
 }
 
 $("#promptSelect").addEventListener("change", loadPrompt);
-$("#essay").addEventListener("input", count);
+$("#essay").addEventListener("input", () => {
+  count();
+  saveWritingProgress();
+});
 $("#modelToggle").addEventListener("click", () => {
   modelOpen = !modelOpen;
   $("#modelAnswer").hidden = !modelOpen;
@@ -875,4 +900,3 @@ $("#modelToggle").addEventListener("click", () => {
 });
 
 loadPrompt();
-count();

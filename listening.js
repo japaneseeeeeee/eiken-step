@@ -13,6 +13,24 @@ let countdownId = null;
 let secondsLeft = 10;
 let selectedAnswers = [];
 
+function saveListeningSession() {
+  const questionIds = questions.map((question) => listening.indexOf(question));
+  window.EikenProgress.updateSection(
+    "listening",
+    {
+      current,
+      total: listening.length,
+      mode,
+      session: { mode, questionIds, current, score, selectedAnswers }
+    },
+    {
+      href: "listening.html?resume=1",
+      title: mode === "mock" ? "リスニング模試の続き" : "リスニング練習の続き",
+      detail: `${current + 1} / ${questions.length}・正解 ${score}`
+    }
+  );
+}
+
 function shuffle(items) {
   const copy = [...items];
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -90,6 +108,12 @@ function render({ autoPlay = false } = {}) {
   if (mode === "mock") setChoicesEnabled(false);
   resetPlayerLabel();
 
+  if (Number.isInteger(selectedAnswers[current])) {
+    answer(selectedAnswers[current], { restoring: true });
+  }
+
+  saveListeningSession();
+
   if (autoPlay) {
     setPlayerCopy("次の音声を準備中…", "自動的に再生します", true);
     window.setTimeout(play, 700);
@@ -139,13 +163,13 @@ function startCountdown() {
   }, 1000);
 }
 
-function answer(index) {
+function answer(index, { restoring = false } = {}) {
   if (answered) return;
   answered = true;
-  selectedAnswers[current] = index;
+  if (!restoring) selectedAnswers[current] = index;
   const question = questions[current];
   const correct = index === question.answer;
-  if (correct) score += 1;
+  if (correct && !restoring) score += 1;
 
   document.querySelectorAll(".choice").forEach((button, choiceIndex) => {
     button.disabled = true;
@@ -159,6 +183,7 @@ function answer(index) {
 
   if (mode === "mock") {
     $("#listenTimer").textContent = `回答しました・次の問題まで ${secondsLeft}秒`;
+    if (!restoring) saveListeningSession();
     return;
   }
 
@@ -168,6 +193,7 @@ function answer(index) {
   $("#listenTranslation").textContent = `訳：${question.translation}`;
   $("#nextListen").textContent = current === questions.length - 1 ? "結果を見る" : "次の問題へ";
   $("#listenFeedback").hidden = false;
+  if (!restoring) saveListeningSession();
 }
 
 function finishMockQuestion() {
@@ -206,6 +232,15 @@ function showComplete() {
   const part1Total = questions.filter((question) => question.part === 1).length;
   const part2Total = questions.filter((question) => question.part === 2).length;
   $("#listenScoreDetail").textContent = `第1部 ${scoreForPart(1)} / ${part1Total}　・　第2部 ${scoreForPart(2)} / ${part2Total}`;
+  window.EikenProgress.updateSection(
+    "listening",
+    { current: 0, total: listening.length, mode, session: null },
+    {
+      href: "listening.html",
+      title: "リスニングをもう一度",
+      detail: `前回 ${score} / ${questions.length}`
+    }
+  );
 }
 
 function startSession() {
@@ -216,6 +251,28 @@ function startSession() {
   $(".listening-card").hidden = false;
   $("#listenComplete").hidden = true;
   render();
+}
+
+function restoreSession() {
+  const saved = window.EikenProgress.read().listening || {};
+  const session = saved.session;
+  if (!session || !Array.isArray(session.questionIds) || session.questionIds.length === 0) return false;
+  if (!session.questionIds.every((id) => Number.isInteger(id) && listening[id])) return false;
+
+  mode = session.mode === "mock" ? "mock" : "practice";
+  questions = session.questionIds.map((id) => listening[id]);
+  current = Math.min(Math.max(Number(session.current) || 0, 0), questions.length - 1);
+  score = Number(session.score) || 0;
+  selectedAnswers = Array.isArray(session.selectedAnswers) ? [...session.selectedAnswers] : [];
+  $("#practiceMode").classList.toggle("active", mode === "practice");
+  $("#mockMode").classList.toggle("active", mode === "mock");
+  $("#modeDescription").textContent = mode === "mock"
+    ? "本番と同じ第1部15問＋第2部15問。英文と質問は1回だけ流れ、各問の解答時間は10秒です。"
+    : "全115問を、解説を確認しながら何度でも練習できます。";
+  $(".listening-card").hidden = false;
+  $("#listenComplete").hidden = true;
+  render();
+  return true;
 }
 
 function setMode(nextMode) {
@@ -238,4 +295,6 @@ window.addEventListener("beforeunload", () => {
   window.EikenAudio.stop();
 });
 
-startSession();
+if (new URLSearchParams(window.location.search).get("resume") !== "1" || !restoreSession()) {
+  startSession();
+}

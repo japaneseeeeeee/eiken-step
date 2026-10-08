@@ -2,6 +2,8 @@
 
 HTML・CSS・JavaScriptだけで動く、英検2級向けの静的学習サイトです。単語・熟語カード、4択問題、リスニング、ライティングを収録しています。
 
+学習状況はブラウザ内に自動保存され、同じ端末・同じブラウザで次回開いたときに続きから再開できます。
+
 ## 収録数
 
 - 単語 1,200語
@@ -18,6 +20,7 @@ HTML・CSS・JavaScriptだけで動く、英検2級向けの静的学習サイ�
 ## ファイル構成
 
 - `index.html` — 学習メニュー
+- `progress.js` — 学習状況の自動保存と再開
 - `vocabulary.html` / `vocabulary.js` — 単語・熟語カード
 - `quiz.html` / `script.js` — 4択問題
 - `listening.html` / `listening-data.js` / `listening.js` — OpenAI生成音声つきリスニング練習・30問模試
@@ -26,9 +29,13 @@ HTML・CSS・JavaScriptだけで動く、英検2級向けの静的学習サイ�
 - `questions-data.js` — 4択問題データ
 - `audio.js` — 音声再生と端末音声フォールバック
 
+## 学習状況の保存
+
+単語・熟語の現在位置、4択問題の途中経過と累計成績、リスニングの途中経過、ライティングの下書きを `localStorage` に保存します。サーバーへの送信やログインはありません。ブラウザのサイトデータを削除した場合や、別の端末・別のブラウザで開いた場合は引き継がれません。
+
 ## 問題を追加・編集する
 
-`script.js` の先頭にある `questions` 配列を編集します。各問題は次の形式です。
+4択問題は `questions-data.js`、単語・熟語は `vocab-data.js`、リスニングは `listening-data.js`、ライティングは `writing.js` 内の配列を編集します。4択問題は次の形式です。
 
 ```js
 {
@@ -43,7 +50,7 @@ HTML・CSS・JavaScriptだけで動く、英検2級向けの静的学習サイ�
 ## GitHub Pagesで公開する
 
 1. GitHubで新しいリポジトリを作成します。
-2. このフォルダ内の3ファイル（READMEを含める場合は4ファイル）をリポジトリ直下へアップロードします。
+2. このフォルダ内のファイルとフォルダをすべてリポジトリ直下へアップロードします。
 3. リポジトリの `Settings` → `Pages` を開きます。
 4. `Build and deployment` の `Source` で `Deploy from a branch` を選びます。
 5. ブランチを `main`、フォルダを `/ (root)` にして `Save` を押します。

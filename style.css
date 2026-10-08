@@ -222,6 +222,12 @@ footer { padding: 25px 20px; color: #8a98a8; text-align: center; font-size: .75r
 .dashboard-main { width: min(1080px, calc(100% - 40px)); }
 .dashboard-hero { padding: 55px 0 35px; }
 .dashboard-hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); }
+.resume-card { margin: 0 0 22px; padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; gap: 22px; border: 1px solid #b9d4e8; border-radius: 18px; background: linear-gradient(135deg, #edf7ff, #fff); box-shadow: 0 10px 28px rgba(18,51,82,.06); }
+.resume-card[hidden] { display: none; }
+.resume-card h2 { margin: 5px 0 2px; color: var(--navy-dark); font-size: 1.3rem; }
+.resume-card p { margin: 0; color: var(--muted); }
+.resume-card small { margin-left: 9px; color: #8a98a8; }
+.resume-card .primary-button { flex: 0 0 auto; padding: 13px 20px; }
 .study-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; padding-bottom: 70px; }
 .study-card { min-height: 220px; padding: 26px; display: grid; grid-template-columns: 1fr auto; align-content: start; border: 1px solid var(--line); border-radius: 20px; color: var(--ink); background: white; box-shadow: 0 12px 30px rgba(18,51,82,.07); text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .study-card:hover { transform: translateY(-3px); border-color: #aac8e1; box-shadow: var(--shadow); }
@@ -230,6 +236,7 @@ footer { padding: 25px 20px; color: #8a98a8; text-align: center; font-size: .75r
 .study-card h2 { margin: 20px 0 2px; color: var(--navy-dark); font-size: 1.45rem; }
 .study-card p { margin: 0; color: var(--muted); }
 .study-card > strong { margin-top: 22px; color: #8999a8; font-size: .82rem; }
+.study-card .saved-progress { grid-column: 1 / -1; margin-top: 7px; color: var(--blue); font-size: .78rem; font-weight: 750; }
 .card-listen .study-icon { color: #7b4b08; background: #fff2d8; }
 .card-write .study-icon { color: #704379; background: #f6eafb; }
 .card-quiz .study-icon { color: var(--green); background: var(--green-bg); }
@@ -326,6 +333,8 @@ textarea:focus { border-color: var(--blue); outline: 3px solid rgba(33,118,199,.
   .question-card { border-radius: 17px; }
   .dashboard-main,.subpage { width: min(100% - 28px, 900px); }
   .dashboard-hero { padding-top: 40px; }
+  .resume-card { align-items: stretch; flex-direction: column; }
+  .resume-card .primary-button { width: 100%; }
   .study-grid { grid-template-columns: 1fr; }
   .study-card { min-height: 185px; }
   .word-card { min-height: 310px; padding: 30px 20px; }
