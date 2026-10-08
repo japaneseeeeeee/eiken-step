@@ -1,6 +1,8 @@
-// 端末内の英語音声から、自然さを優先して選択します。
+// 録音済み音声を優先し、読み込みに失敗した場合だけ端末音声へ切り替えます。
 window.EikenAudio = (() => {
   const synth = window.speechSynthesis;
+  let playbackToken = 0;
+  let currentAudio = null;
 
   function englishVoices() {
     return synth.getVoices().filter((voice) => /^en[-_]/i.test(voice.lang));
@@ -25,36 +27,89 @@ window.EikenAudio = (() => {
     return voices.sort((a, b) => rankVoice(b, preferred) - rankVoice(a, preferred))[0] || null;
   }
 
-  function makeUtterance(text, kind, rate = 0.88) {
+  function makeUtterance(text, kind, rate = 0.84) {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
+    utterance.lang = kind === "male" ? "en-GB" : "en-US";
     utterance.rate = rate;
-    utterance.pitch = kind === "male" ? 0.92 : 1.04;
+    utterance.pitch = 1;
     utterance.volume = 1;
     const voice = selectVoice(kind);
     if (voice) utterance.voice = voice;
     return utterance;
   }
 
-  function speak(text, options = {}) {
+  function stop() {
+    playbackToken += 1;
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      currentAudio = null;
+    }
     synth.cancel();
-    synth.speak(makeUtterance(text, options.kind || "female", options.rate || 0.86));
+  }
+
+  function speak(text, options = {}) {
+    stop();
+    synth.speak(makeUtterance(text, options.kind || "female", options.rate || 0.82));
   }
 
   function speakDialogue(script) {
     synth.cancel();
     const parts = [...script.matchAll(/(Woman|Man):\s*([\s\S]*?)(?=\s+(?:Woman|Man):|$)/g)];
     if (!parts.length) {
-      speak(script, { rate: 0.86 });
+      synth.speak(makeUtterance(script, "female", 0.82));
       return;
     }
     parts.forEach((part) => {
       const kind = part[1] === "Man" ? "male" : "female";
-      synth.speak(makeUtterance(part[2].trim(), kind, 0.86));
+      synth.speak(makeUtterance(part[2].trim(), kind, 0.82));
     });
   }
 
-  // Chromeでは音声一覧が遅れて読み込まれるため、先に取得を促します。
+  function playDialogue(paths, script, callbacks = {}) {
+    stop();
+    const token = playbackToken;
+    const sources = Array.isArray(paths) ? paths : [];
+    if (!sources.length) {
+      callbacks.onStart?.();
+      speakDialogue(script);
+      callbacks.onEnd?.();
+      return;
+    }
+
+    let index = 0;
+    let fallbackStarted = false;
+    callbacks.onStart?.();
+
+    function fallback() {
+      if (fallbackStarted || token !== playbackToken) return;
+      fallbackStarted = true;
+      currentAudio = null;
+      callbacks.onError?.();
+      speakDialogue(script);
+    }
+
+    function playNext() {
+      if (token !== playbackToken) return;
+      if (index >= sources.length) {
+        currentAudio = null;
+        callbacks.onEnd?.();
+        return;
+      }
+
+      const audio = new Audio(sources[index]);
+      index += 1;
+      currentAudio = audio;
+      audio.preload = "auto";
+      audio.addEventListener("ended", () => window.setTimeout(playNext, 180), { once: true });
+      audio.addEventListener("error", fallback, { once: true });
+      const started = audio.play();
+      if (started?.catch) started.catch(fallback);
+    }
+
+    playNext();
+  }
+
   synth.getVoices();
-  return { speak, speakDialogue };
+  return { speak, speakDialogue, playDialogue, stop };
 })();

@@ -6,9 +6,9 @@ HTML・CSS・JavaScriptだけで動く、英検2級向けの静的学習サイ�
 
 - 単語 1,200語
 - 熟語 300個
-- 4択問題 400問（毎回ランダムに10問出題）
-- リスニング 3問
-- ライティング 3題
+- 4択問題 600問（毎回ランダムに10問出題）
+- リスニング 20問（録音済み男女音声）
+- ライティング 15題
 
 ## 使い方
 
@@ -19,10 +19,11 @@ HTML・CSS・JavaScriptだけで動く、英検2級向けの静的学習サイ�
 - `index.html` — 学習メニュー
 - `vocabulary.html` / `vocabulary.js` — 単語・熟語カード
 - `quiz.html` / `script.js` — 4択問題
-- `listening.html` / `listening.js` — 音声つきリスニング
+- `listening.html` / `listening-data.js` / `listening.js` — 録音済み音声つきリスニング
 - `writing.html` / `writing.js` — ライティング練習
 - `style.css` — デザインとスマホ対応
-- `script.js` — 問題データとクイズの動作
+- `questions-data.js` — 4択問題データ
+- `audio.js` — 音声再生と端末音声フォールバック
 
 ## 問題を追加・編集する
 

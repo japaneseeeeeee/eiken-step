@@ -1,12 +1,85 @@
-const listening=[
-{script:"Woman: Excuse me, when does the next bus to the airport leave? Man: It leaves at ten thirty, but you should buy your ticket now. Woman: Thank you. I'll do that.",question:"What will the woman probably do next?",choices:["Buy a ticket","Call the airport","Take a taxi","Go home"],answer:0,translation:"女性：すみません、空港行きの次のバスはいつ出ますか。男性：10時30分ですが、今切符を買ったほうがいいですよ。女性：ありがとう。そうします。",explanation:"女性は “I'll do that.” と答えているため、次に切符を買うと考えられます。"},
-{script:"Man: How was your trip to Kyoto, Lisa? Woman: It was great, but it rained on Saturday. Luckily, Sunday was sunny, so we visited three temples. Man: That sounds nice.",question:"What did Lisa do on Sunday?",choices:["She stayed at a hotel","She visited temples","She went shopping","She returned home"],answer:1,translation:"男性：京都旅行はどうだった、リサ？ 女性：よかったけど、土曜日は雨だったの。幸い日曜日は晴れたので、お寺を3か所訪れたわ。",explanation:"日曜日は晴れ、3つのお寺を訪れたと言っています。"},
-{script:"Woman: Are you going to the science club meeting after school? Man: I want to, but I have to finish my history report today. Woman: I see. Maybe next week, then.",question:"Why can't the man go to the meeting?",choices:["He is feeling sick","He has another meeting","He must finish a report","He does not like science"],answer:2,translation:"女性：放課後の科学部の集まりに行く？ 男性：行きたいけれど、今日歴史のレポートを終えないといけないんだ。",explanation:"男性は歴史のレポートを終える必要があるため参加できません。"}
-];
-let current=0,score=0,answered=false;const $=s=>document.querySelector(s);
-function render(){answered=false;const q=listening[current];$("#listenProgress").textContent=`${current+1} / ${listening.length}`;$("#listenNumber").textContent=`QUESTION ${String(current+1).padStart(2,"0")}`;$("#listenQuestion").textContent=q.question;$("#listenFeedback").hidden=true;$("#listenChoices").innerHTML=q.choices.map((c,i)=>`<button class="choice" data-i="${i}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${c}</span></button>`).join("");document.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>answer(Number(b.dataset.i))))}
-function play(){window.EikenAudio.speakDialogue(listening[current].script)}
-function answer(i){if(answered)return;answered=true;const q=listening[current],ok=i===q.answer;if(ok)score++;document.querySelectorAll(".choice").forEach((b,n)=>{b.disabled=true;if(n===q.answer)b.classList.add("correct");if(n===i&&!ok)b.classList.add("incorrect")});$("#listenResult").textContent=ok?"正解です！":"惜しい！ 正解を確認しましょう。";$("#listenExplanation").textContent=q.explanation;$("#listenScript").textContent=q.script;$("#listenTranslation").textContent=`訳：${q.translation}`;$("#nextListen").textContent=current===listening.length-1?"結果を見る":"次の問題へ";$("#listenFeedback").hidden=false}
-function next(){if(!answered)return;if(current<listening.length-1){current++;render()}else{$(".listening-card").hidden=true;$("#listenComplete").hidden=false;$("#listenScore").textContent=`3問中 ${score}問正解でした。`}}
-function retry(){current=0;score=0;$(".listening-card").hidden=false;$("#listenComplete").hidden=true;render()}
-$("#playAudio").addEventListener("click",play);$("#nextListen").addEventListener("click",next);$("#retryListen").addEventListener("click",retry);render();
+const listening = window.LISTENING_DATA || [];
+let current = 0;
+let score = 0;
+let answered = false;
+const $ = (selector) => document.querySelector(selector);
+
+function resetPlayerLabel() {
+  const button = $("#playAudio");
+  button.disabled = false;
+  button.querySelector("strong").textContent = "会話を再生する";
+  button.querySelector("small").textContent = "録音済みの男女音声で再生";
+}
+
+function render() {
+  answered = false;
+  window.EikenAudio.stop();
+  resetPlayerLabel();
+  const question = listening[current];
+  $("#listenProgress").textContent = `${current + 1} / ${listening.length}`;
+  $("#listenNumber").textContent = `QUESTION ${String(current + 1).padStart(2, "0")}`;
+  $("#listenQuestion").textContent = question.question;
+  $("#listenFeedback").hidden = true;
+  $("#listenChoices").innerHTML = question.choices.map((choice, index) => `<button class="choice" data-i="${index}"><span class="choice-letter">${String.fromCharCode(65 + index)}</span><span>${choice}</span></button>`).join("");
+  document.querySelectorAll(".choice").forEach((button) => button.addEventListener("click", () => answer(Number(button.dataset.i))));
+}
+
+function play() {
+  const question = listening[current];
+  window.EikenAudio.playDialogue(question.audio, question.script, {
+    onStart() {
+      const button = $("#playAudio");
+      button.disabled = true;
+      button.querySelector("strong").textContent = "再生中…";
+      button.querySelector("small").textContent = "自然な間を入れて再生しています";
+    },
+    onEnd: resetPlayerLabel,
+    onError: resetPlayerLabel
+  });
+}
+
+function answer(index) {
+  if (answered) return;
+  answered = true;
+  const question = listening[current];
+  const correct = index === question.answer;
+  if (correct) score += 1;
+  document.querySelectorAll(".choice").forEach((button, choiceIndex) => {
+    button.disabled = true;
+    if (choiceIndex === question.answer) button.classList.add("correct");
+    if (choiceIndex === index && !correct) button.classList.add("incorrect");
+  });
+  $("#listenResult").textContent = correct ? "正解です！" : "惜しい！ 正解を確認しましょう。";
+  $("#listenExplanation").textContent = question.explanation;
+  $("#listenScript").textContent = question.script;
+  $("#listenTranslation").textContent = `訳：${question.translation}`;
+  $("#nextListen").textContent = current === listening.length - 1 ? "結果を見る" : "次の問題へ";
+  $("#listenFeedback").hidden = false;
+}
+
+function next() {
+  if (!answered) return;
+  if (current < listening.length - 1) {
+    current += 1;
+    render();
+  } else {
+    window.EikenAudio.stop();
+    $(".listening-card").hidden = true;
+    $("#listenComplete").hidden = false;
+    $("#listenScore").textContent = `${listening.length}問中 ${score}問正解でした。`;
+  }
+}
+
+function retry() {
+  current = 0;
+  score = 0;
+  $(".listening-card").hidden = false;
+  $("#listenComplete").hidden = true;
+  render();
+}
+
+$("#playAudio").addEventListener("click", play);
+$("#nextListen").addEventListener("click", next);
+$("#retryListen").addEventListener("click", retry);
+window.addEventListener("beforeunload", () => window.EikenAudio.stop());
+render();
