@@ -847,6 +847,7 @@ const $ = (selector) => document.querySelector(selector);
 let modelOpen = false;
 const savedWriting = window.EikenProgress.read().writing || {};
 const drafts = { ...(savedWriting.drafts || {}) };
+const gradeResults = { ...(savedWriting.gradeResults || {}) };
 let activePromptIndex = Math.min(Math.max(Number(savedWriting.promptIndex) || 0, 0), prompts.length - 1);
 
 $("#promptSelect").innerHTML = prompts.map((_, index) => `<option value="${index}">お題 ${index + 1}</option>`).join("");
@@ -857,7 +858,7 @@ function saveWritingProgress() {
   const completedDrafts = Object.values(drafts).filter((draft) => draft.trim()).length;
   window.EikenProgress.updateSection(
     "writing",
-    { promptIndex: activePromptIndex, drafts },
+    { promptIndex: activePromptIndex, drafts, gradeResults },
     {
       href: "writing.html?resume=1",
       title: "ライティングの続き",
@@ -877,6 +878,7 @@ function loadPrompt() {
   $("#modelAnswer").hidden = true;
   $("#modelToggle").textContent = "模範解答を見る";
   count();
+  showSavedGrade();
   saveWritingProgress();
 }
 
@@ -891,12 +893,316 @@ function count() {
 $("#promptSelect").addEventListener("change", loadPrompt);
 $("#essay").addEventListener("input", () => {
   count();
+  showSavedGrade(true);
   saveWritingProgress();
 });
 $("#modelToggle").addEventListener("click", () => {
   modelOpen = !modelOpen;
   $("#modelAnswer").hidden = !modelOpen;
   $("#modelToggle").textContent = modelOpen ? "模範解答を閉じる" : "模範解答を見る";
+});
+
+const criterionLabels = {
+  content: "内容",
+  organization: "構成",
+  vocabulary: "語彙",
+  grammar: "文法",
+};
+
+function setGradingStatus(message = "", type = "") {
+  const status = $("#gradingStatus");
+  status.textContent = message;
+  status.className = `grading-status${type ? ` ${type}` : ""}`;
+}
+
+function appendTextElement(parent, tagName, className, text) {
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  element.textContent = text;
+  parent.appendChild(element);
+  return element;
+}
+
+function renderGrade(result) {
+  $("#gradingTotal").textContent = String(result.total);
+  $("#gradingOverview").textContent = result.overview;
+
+  const breakdown = $("#gradingBreakdown");
+  breakdown.replaceChildren();
+  Object.entries(criterionLabels).forEach(([key, label]) => {
+    const item = document.createElement("article");
+    item.className = "criterion-card";
+    const head = document.createElement("div");
+    appendTextElement(head, "strong", "", label);
+    appendTextElement(head, "span", "criterion-score", `${result[key].score} / 4`);
+    item.appendChild(head);
+    appendTextElement(item, "p", "", result[key].comment);
+    breakdown.appendChild(item);
+  });
+
+  const advice = $("#gradingAdvice");
+  advice.replaceChildren();
+  result.advice.forEach((item) => appendTextElement(advice, "li", "", item));
+
+  const corrections = $("#gradingCorrections");
+  corrections.replaceChildren();
+  $("#correctionsSection").hidden = result.corrections.length === 0;
+  result.corrections.forEach((correction) => {
+    const item = document.createElement("article");
+    item.className = "correction-item";
+    appendTextElement(item, "p", "correction-original", correction.original);
+    appendTextElement(item, "p", "correction-fixed", correction.corrected);
+    appendTextElement(item, "small", "", correction.reason);
+    corrections.appendChild(item);
+  });
+
+  $("#improvedEssay").textContent = result.improved_essay;
+  $("#gradingPanel").hidden = false;
+}
+
+function showSavedGrade(edited = false) {
+  const saved = gradeResults[activePromptIndex];
+  const essay = $("#essay").value.trim();
+  if (saved && saved.gradedEssay === essay) {
+    renderGrade(saved);
+    if (!edited) setGradingStatus("前回の採点結果を表示しています。", "success");
+    return;
+  }
+
+  $("#gradingPanel").hidden = true;
+  if (edited && saved) {
+    setGradingStatus("解答を編集したため、もう一度採点できます。", "");
+  } else {
+    setGradingStatus();
+  }
+}
+
+const stopWords = new Set([
+  "a", "an", "and", "are", "as", "at", "be", "because", "but", "by", "can", "do", "for", "from",
+  "has", "have", "he", "her", "his", "i", "if", "in", "is", "it", "its", "may", "more", "my", "not",
+  "of", "on", "or", "our", "people", "should", "so", "some", "that", "the", "their", "them", "they",
+  "this", "to", "use", "we", "when", "which", "will", "with", "would", "you", "your"
+]);
+
+const topicStopWords = new Set([
+  ...stopWords, "think", "future", "students", "schools", "cities", "companies", "workplaces", "shoppers"
+]);
+
+const usefulVocabulary = new Set([
+  "advantage", "afford", "although", "benefit", "community", "convenient", "develop", "effective", "efficient",
+  "environment", "experience", "flexible", "furthermore", "however", "improve", "independent", "instead", "moreover",
+  "opportunity", "pollution", "prevent", "provide", "reduce", "responsibility", "therefore", "valuable", "various"
+]);
+
+const commonMisspellings = {
+  becouse: "because", beacause: "because", goverment: "government", enviroment: "environment",
+  comunity: "community", convienient: "convenient", diffrent: "different", importent: "important",
+  neccesary: "necessary", necesary: "necessary", oportunity: "opportunity", responsability: "responsibility",
+  recieve: "receive", seperate: "separate", tecnology: "technology", thier: "their", wich: "which",
+  alot: "a lot", benifit: "benefit", developement: "development", studens: "students"
+};
+
+function essayWords(text) {
+  return (text.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g) || []);
+}
+
+function essaySentences(text) {
+  return (text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [])
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+function countMatches(text, pattern) {
+  return (text.match(pattern) || []).length;
+}
+
+function cleanEssay(essay) {
+  let fixed = essay.trim().replace(/[ \t]+/g, " ").replace(/\s+([,.!?])/g, "$1");
+  const corrections = [];
+  const addCorrection = (original, corrected, reason) => {
+    if (original === corrected || corrections.length >= 6) return;
+    if (corrections.some((item) => item.original === original && item.corrected === corrected)) return;
+    corrections.push({ original, corrected, reason });
+  };
+
+  fixed = fixed.replace(/\bi\b/g, (match) => {
+    addCorrection(match, "I", "一人称の I は大文字で書きます。");
+    return "I";
+  });
+
+  Object.entries(commonMisspellings).forEach(([wrong, right]) => {
+    const pattern = new RegExp(`\\b${wrong}\\b`, "gi");
+    fixed = fixed.replace(pattern, (match) => {
+      const replacement = /^[A-Z]/.test(match) ? right[0].toUpperCase() + right.slice(1) : right;
+      addCorrection(match, replacement, "つづりを確認しましょう。");
+      return replacement;
+    });
+  });
+
+  const grammarRules = [
+    [/\b(I) (?:is|are)\b/gi, "$1 am", "I の後は am を使います。"],
+    [/\b(I) has\b/gi, "$1 have", "I の後は have を使います。"],
+    [/\b(he|she|it) have\b/gi, "$1 has", "三人称単数では has を使います。"],
+    [/\b(he|she|it) do not\b/gi, "$1 does not", "三人称単数では does not を使います。"],
+    [/\b(people|students|they|we) is\b/gi, "$1 are", "複数の主語には are を使います。"],
+    [/\b(people|students|they|we) has\b/gi, "$1 have", "複数の主語には have を使います。"],
+    [/\b([a-z]+)\s+\1\b/gi, "$1", "同じ単語が続いています。"]
+  ];
+
+  grammarRules.forEach(([pattern, replacement, reason]) => {
+    fixed = fixed.replace(pattern, (match, group) => {
+      const corrected = replacement.replace("$1", group);
+      addCorrection(match, corrected, reason);
+      return corrected;
+    });
+  });
+
+  fixed = fixed.replace(/(^|[.!?]\s+)([a-z])/g, (match, prefix, letter) => {
+    const corrected = `${prefix}${letter.toUpperCase()}`;
+    addCorrection(match.trim(), corrected.trim(), "文の最初は大文字で始めます。");
+    return corrected;
+  });
+
+  if (fixed && !/[.!?]$/.test(fixed)) {
+    const finalWords = fixed.split(/\s+/).slice(-5).join(" ");
+    addCorrection(finalWords, `${finalWords}.`, "文末にピリオドなどを付けます。");
+    fixed += ".";
+  }
+
+  return { fixed, corrections };
+}
+
+function analyzeEssay(essay, prompt) {
+  const lower = essay.toLowerCase();
+  const words = essayWords(essay);
+  const sentences = essaySentences(essay);
+  const wordTotal = words.length;
+  const { fixed, corrections } = cleanEssay(essay);
+
+  const stance = /\b(i (?:think|believe|feel|agree|disagree)|in my opinion|from my point of view)\b/i.test(essay);
+  const firstReason = /\b(first(?:ly)?|one reason|to begin with)\b/i.test(essay);
+  const secondReason = /\b(second(?:ly)?|another reason|in addition)\b/i.test(essay);
+  const becauseCount = countMatches(lower, /\b(because|since|for example|for instance)\b/g);
+  const reasonCount = (firstReason ? 1 : 0) + (secondReason ? 1 : 0) + Math.min(becauseCount, 2);
+  const conclusion = /\b(for these reasons|therefore|in conclusion|to conclude|overall|that is why|thus)\b/i.test(essay);
+  const connectorCount = countMatches(lower, /\b(first|firstly|second|secondly|also|however|although|moreover|furthermore|therefore|because|for example|for instance|in addition|on the other hand|as a result)\b/g);
+
+  const topicKeywords = essayWords(prompt.topic).filter((word) => word.length > 3 && !topicStopWords.has(word));
+  const pointKeywords = prompt.points.flatMap((point) => essayWords(point));
+  const topicHits = topicKeywords.filter((word) => words.includes(word)).length;
+  const pointHits = pointKeywords.filter((word) => words.includes(word)).length;
+  const relevant = topicHits > 0 || pointHits > 0;
+
+  const contentBaseScore = Math.min(4,
+    (stance ? 1 : 0) +
+    (reasonCount >= 2 ? 2 : reasonCount >= 1 ? 1 : 0) +
+    (relevant ? 1 : 0)
+  );
+  const contentScore = wordTotal < 60 ? Math.min(contentBaseScore, 2) : wordTotal < 80 ? Math.min(contentBaseScore, 3) : contentBaseScore;
+
+  const organizationBaseScore = Math.min(4,
+    (stance ? 1 : 0) +
+    (firstReason && secondReason ? 1 : 0) +
+    (conclusion ? 1 : 0) +
+    (connectorCount >= 3 || sentences.length >= 5 ? 1 : 0)
+  );
+  const organizationScore = wordTotal < 60 ? Math.min(organizationBaseScore, 3) : organizationBaseScore;
+
+  const contentWords = words.filter((word) => word.length > 2 && !stopWords.has(word));
+  const uniqueContent = new Set(contentWords);
+  const uniqueRatio = contentWords.length ? uniqueContent.size / contentWords.length : 0;
+  const frequencies = contentWords.reduce((map, word) => {
+    map[word] = (map[word] || 0) + 1;
+    return map;
+  }, {});
+  const highestFrequency = Math.max(0, ...Object.values(frequencies));
+  const advancedCount = [...uniqueContent].filter((word) =>
+    usefulVocabulary.has(word) || word.length >= 9 || /(?:tion|ment|ity|ive|ous|ally)$/.test(word)
+  ).length;
+  const vocabularyBaseScore = Math.min(4,
+    (wordTotal >= 20 ? 1 : 0) +
+    (uniqueRatio >= 0.58 ? 1 : 0) +
+    (advancedCount >= 3 ? 1 : 0) +
+    (uniqueContent.size >= 18 && highestFrequency <= 3 ? 1 : 0)
+  );
+  const vocabularyScore = wordTotal < 60 ? Math.min(vocabularyBaseScore, 3) : vocabularyBaseScore;
+
+  const longSentences = sentences.filter((sentence) => essayWords(sentence).length > 35).length;
+  const fragments = sentences.filter((sentence) => essayWords(sentence).length < 3).length;
+  const grammarIssues = corrections.length + longSentences + fragments;
+  const grammarScore = grammarIssues === 0 ? 4 : grammarIssues === 1 ? 3 : grammarIssues <= 3 ? 2 : grammarIssues <= 5 ? 1 : 0;
+
+  const total = contentScore + organizationScore + vocabularyScore + grammarScore;
+  const advice = [];
+  if (contentScore < 4) advice.push(reasonCount < 2 ? "自分の意見に加えて、異なる理由を2つ具体的に説明しましょう。" : "TOPICやPOINTSに直接つながる具体例を1つ加えましょう。");
+  if (organizationScore < 4) advice.push(!conclusion ? "最後に For these reasons などを使って意見をまとめましょう。" : "First、Second、However などで文同士の関係を明確にしましょう。");
+  if (vocabularyScore < 4) advice.push("同じ単語の繰り返しを避け、授業で学んだ英検2級語彙に言い換えましょう。");
+  if (grammarScore < 4) advice.push("自動検出された箇所に加え、主語と動詞・単数複数・時制を音読して確認しましょう。");
+  if (advice.length < 2) advice.push("理由ごとに短い具体例を加えると、より説得力が上がります。");
+  if (advice.length < 2) advice.push("模範解答と比べ、使えそうな接続表現を1つ取り入れましょう。");
+
+  const wordMessage = wordTotal < 80
+    ? `現在${wordTotal}語です。目標まであと${80 - wordTotal}語あります。`
+    : wordTotal <= 100
+      ? `現在${wordTotal}語で、目標語数に収まっています。`
+      : `現在${wordTotal}語です。重要な内容を残して${wordTotal - 100}語ほど減らしましょう。`;
+  const levelMessage = total >= 14
+    ? "4観点がよくそろった答案です。"
+    : total >= 11
+      ? "英検2級らしい形ができています。弱い観点を1つ直すとさらに伸びます。"
+      : total >= 8
+        ? "基本の形はできています。理由とつなぎ言葉を増やしましょう。"
+        : "意見・理由2つ・まとめの順に書き直すと得点しやすくなります。";
+
+  return {
+    content: {
+      score: contentScore,
+      comment: `${stance ? "意見あり" : "明確な意見表現が必要"}・理由${Math.min(reasonCount, 2)}個・POINTS関連語${pointHits}個を確認しました。`
+    },
+    organization: {
+      score: organizationScore,
+      comment: `つなぎ言葉${connectorCount}個、${conclusion ? "まとめ表現あり" : "まとめ表現なし"}、${sentences.length}文を確認しました。`
+    },
+    vocabulary: {
+      score: vocabularyScore,
+      comment: `内容語${contentWords.length}語のうち${uniqueContent.size}種類、発展語彙の目安${advancedCount}語を確認しました。`
+    },
+    grammar: {
+      score: grammarScore,
+      comment: grammarIssues === 0 ? "機械的に検出できる基本的な誤りは見つかりませんでした。" : `表記・基本文法・文の長さについて${grammarIssues}件の注意点を検出しました。`
+    },
+    total,
+    overview: `${levelMessage} ${wordMessage}`,
+    corrections,
+    improved_essay: fixed,
+    advice: advice.slice(0, 3),
+    method: "local-v1"
+  };
+}
+
+$("#gradeWriting").addEventListener("click", () => {
+  const essay = $("#essay").value.trim();
+  const words = essay ? essay.split(/\s+/).length : 0;
+  if (words < 20) {
+    setGradingStatus("採点するには20語以上入力してください。", "error");
+    return;
+  }
+
+  const requestIndex = activePromptIndex;
+  const prompt = prompts[requestIndex];
+  const button = $("#gradeWriting");
+  button.disabled = true;
+  button.textContent = "分析中…";
+  setGradingStatus("端末内で4つの観点を分析しています。", "loading");
+
+  const result = analyzeEssay(essay, prompt);
+  gradeResults[requestIndex] = { ...result, gradedEssay: essay };
+  saveWritingProgress();
+  renderGrade(gradeResults[requestIndex]);
+  setGradingStatus("無料採点が完了しました。通信や料金は発生していません。", "success");
+  button.disabled = false;
+  button.textContent = "無料で採点する";
+  $("#gradingPanel").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 loadPrompt();

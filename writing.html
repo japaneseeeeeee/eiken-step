@@ -1,4 +1,87 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#163c63"><title>ライティング｜EIKEN STEP</title><link rel="stylesheet" href="style.css"><script src="progress.js" defer></script><script src="writing.js" defer></script></head><body>
-<header class="site-header"><a class="brand" href="index.html"><span class="brand-mark">E</span><span>EIKEN <strong>STEP</strong></span></a><span class="level-badge">ライティング</span></header><main class="subpage"><nav class="back-nav"><a href="index.html">トップへ戻る</a><span>目標 80〜100語</span></nav><section class="page-intro"><p class="eyebrow">WRITING PRACTICE</p><h1>意見を英語で書く</h1><p>自分の意見と理由を2つ書きましょう。入力内容はこの端末内だけで扱われます。</p></section>
-<section class="writing-layout"><article class="prompt-card"><label for="promptSelect">お題を選ぶ</label><select id="promptSelect"></select><div class="topic-box"><span>TOPIC</span><h2 id="writingTopic"></h2></div><div class="points-box"><strong>POINTS</strong><ul id="writingPoints"></ul></div><div class="writing-tips"><h3>書き方の流れ</h3><ol><li>自分の意見を述べる</li><li>理由を2つ説明する</li><li>最後に意見をまとめる</li></ol></div></article>
-<article class="editor-card"><div class="editor-head"><label for="essay">あなたの解答</label><span id="wordCount">0 words</span></div><textarea id="essay" rows="14" placeholder="I think that ..."></textarea><div id="countGuide" class="count-guide">あと80語で目標に到達</div><button id="modelToggle" class="secondary-button full-button">模範解答を見る</button><div id="modelAnswer" class="model-answer" hidden><h3>模範解答</h3><p id="modelText"></p><p class="model-note">構成や表現の参考として使い、自分の意見に置き換えて練習しましょう。</p></div></article></section></main><footer>© 2026 EIKEN STEP</footer></body></html>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#163c63">
+  <title>ライティング｜EIKEN STEP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="progress.js" defer></script>
+  <script src="writing.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark">E</span><span>EIKEN <strong>STEP</strong></span></a>
+    <span class="level-badge">ライティング</span>
+  </header>
+  <main class="subpage">
+    <nav class="back-nav"><a href="index.html">トップへ戻る</a><span>目標 80〜100語</span></nav>
+    <section class="page-intro">
+      <p class="eyebrow">WRITING PRACTICE</p>
+      <h1>意見を英語で書く</h1>
+      <p>自分の意見と理由を2つ書きましょう。入力内容は外部へ送信せず、この端末内だけで無料採点します。</p>
+    </section>
+
+    <section class="writing-layout">
+      <article class="prompt-card">
+        <label for="promptSelect">お題を選ぶ</label>
+        <select id="promptSelect"></select>
+        <div class="topic-box"><span>TOPIC</span><h2 id="writingTopic"></h2></div>
+        <div class="points-box"><strong>POINTS</strong><ul id="writingPoints"></ul></div>
+        <div class="writing-tips">
+          <h3>書き方の流れ</h3>
+          <ol><li>自分の意見を述べる</li><li>理由を2つ説明する</li><li>最後に意見をまとめる</li></ol>
+        </div>
+      </article>
+
+      <article class="editor-card">
+        <div class="editor-head"><label for="essay">あなたの解答</label><span id="wordCount">0 words</span></div>
+        <textarea id="essay" rows="14" placeholder="I think that ..."></textarea>
+        <div id="countGuide" class="count-guide">あと80語で目標に到達</div>
+
+        <div class="writing-actions">
+          <button id="gradeWriting" class="primary-button full-button" type="button">無料で採点する</button>
+          <button id="modelToggle" class="secondary-button full-button" type="button">模範解答を見る</button>
+        </div>
+        <p class="grading-note">英検2級の4観点を各4点、合計16点で分析します。通信・登録・API料金は不要です。</p>
+        <p id="gradingStatus" class="grading-status" role="status" aria-live="polite"></p>
+
+        <section id="gradingPanel" class="grading-panel" hidden aria-labelledby="gradingTitle">
+          <div class="grading-summary">
+            <div>
+              <p class="eyebrow">FREE CHECK</p>
+              <h2 id="gradingTitle">採点結果</h2>
+            </div>
+            <div class="writing-score"><strong id="gradingTotal">0</strong><span>/ 16</span></div>
+          </div>
+          <div id="gradingBreakdown" class="grading-breakdown"></div>
+          <div class="grading-section">
+            <h3>全体講評</h3>
+            <p id="gradingOverview"></p>
+          </div>
+          <div class="grading-section">
+            <h3>次に意識すること</h3>
+            <ul id="gradingAdvice"></ul>
+          </div>
+          <div id="correctionsSection" class="grading-section">
+            <h3>主な修正点</h3>
+            <div id="gradingCorrections" class="correction-list"></div>
+          </div>
+          <div class="grading-section improved-section">
+            <h3>自動修正版</h3>
+            <p id="improvedEssay"></p>
+            <small>機械的に検出できた表記・基本文法のみを直しています。内容や自然さは模範解答とも比べてください。</small>
+          </div>
+        </section>
+
+        <div id="modelAnswer" class="model-answer" hidden>
+          <h3>模範解答</h3>
+          <p id="modelText"></p>
+          <p class="model-note">構成や表現の参考として使い、自分の意見に置き換えて練習しましょう。</p>
+        </div>
+      </article>
+    </section>
+  </main>
+  <footer>© 2026 EIKEN STEP</footer>
+</body>
+</html>
