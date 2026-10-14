@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#163c63">
+  <meta name="description" content="英検2級ライティングの構成、理由の広げ方、使える表現を基礎から学べます。">
+  <title>ライティング講座｜EIKEN STEP</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="progress.js" defer></script>
+  <script src="writing-study.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark">E</span><span>EIKEN <strong>STEP</strong></span></a>
+    <span class="level-badge">ライティング講座</span>
+  </header>
+
+  <main class="subpage writing-study-page">
+    <nav class="back-nav"><a href="index.html">トップへ戻る</a><span>英検2級・80〜100語</span></nav>
+    <section class="page-intro">
+      <p class="eyebrow">WRITING LESSON</p>
+      <h1>型から学べば、<br><span>英作文は迷わない。</span></h1>
+      <p>6つの短い講座で、採点基準・文章の組み立て方・使える表現を順番に学びます。</p>
+    </section>
+
+    <nav class="writing-mode-nav" aria-label="ライティング学習メニュー">
+      <a class="active" href="writing-study.html" aria-current="page"><span>01</span><strong>書き方を学ぶ</strong><small>基礎講座・表現集</small></a>
+      <a href="writing.html"><span>02</span><strong>問題を解く</strong><small>100題・無料採点</small></a>
+    </nav>
+
+    <section class="study-progress-card" aria-labelledby="studyProgressTitle">
+      <div>
+        <p class="study-meta">YOUR PROGRESS</p>
+        <h2 id="studyProgressTitle">基礎講座 <span id="lessonCount">0 / 6</span></h2>
+      </div>
+      <div class="study-progress-track" aria-hidden="true"><span id="lessonProgressBar"></span></div>
+      <p id="studyProgressMessage">まずは「採点基準を知る」から始めましょう。</p>
+    </section>
+
+    <section class="writing-lessons" aria-labelledby="lessonsTitle">
+      <div class="section-heading">
+        <p class="eyebrow">6 MINI LESSONS</p>
+        <h2 id="lessonsTitle">5分でわかる基礎講座</h2>
+      </div>
+
+      <article class="writing-lesson" data-lesson="score">
+        <div class="lesson-number">01</div>
+        <div class="lesson-body">
+          <p class="lesson-kicker">採点基準</p>
+          <h3>4つの観点を知る</h3>
+          <p>英検2級では、内容・構成・語彙・文法を各4点、合計16点で評価します。</p>
+          <div class="rubric-grid">
+            <div><strong>内容</strong><span>意見と理由2つがある</span></div>
+            <div><strong>構成</strong><span>流れとつなぎ言葉が明確</span></div>
+            <div><strong>語彙</strong><span>適切な単語を使えている</span></div>
+            <div><strong>文法</strong><span>正しい文を幅広く使う</span></div>
+          </div>
+          <p class="lesson-tip"><strong>合格のコツ：</strong>難しい表現より、質問に正しく答えて80〜100語にまとめることを優先しましょう。</p>
+          <button class="lesson-complete" type="button">この講座を完了</button>
+        </div>
+      </article>
+
+      <article class="writing-lesson" data-lesson="structure">
+        <div class="lesson-number">02</div>
+        <div class="lesson-body">
+          <p class="lesson-kicker">基本の型</p>
+          <h3>4段落で組み立てる</h3>
+          <p>最初に型を決めると、途中で何を書くか迷いません。</p>
+          <div class="writing-template">
+            <div><span>1</span><p><strong>意見</strong><br><em>I think that ...</em></p></div>
+            <div><span>2</span><p><strong>理由1＋説明</strong><br><em>First, ... because ...</em></p></div>
+            <div><span>3</span><p><strong>理由2＋説明</strong><br><em>Second, ... For example, ...</em></p></div>
+            <div><span>4</span><p><strong>まとめ</strong><br><em>For these reasons, I believe ...</em></p></div>
+          </div>
+          <p class="lesson-tip"><strong>語数の目安：</strong>意見15語＋理由1を25語＋理由2を25語＋まとめ15語で約80語です。</p>
+          <button class="lesson-complete" type="button">この講座を完了</button>
+        </div>
+      </article>
+
+      <article class="writing-lesson" data-lesson="opinion">
+        <div class="lesson-number">03</div>
+        <div class="lesson-body">
+          <p class="lesson-kicker">意見</p>
+          <h3>最初の1文で立場を示す</h3>
+          <p>賛成か反対かを曖昧にせず、TOPICの言葉を使って答えます。</p>
+          <div class="example-pair">
+            <div class="example-good"><span>GOOD</span><p>I think that students should use tablets at school.</p></div>
+            <div class="example-bad"><span>AVOID</span><p>Tablets are used by many people.</p></div>
+          </div>
+          <p class="lesson-tip">質問が <em>Do you think ...?</em> なら <em>I think that ...</em>、<em>Should ...?</em> なら <em>I think ... should ...</em> が使えます。</p>
+          <button class="lesson-complete" type="button">この講座を完了</button>
+        </div>
+      </article>
+
+      <article class="writing-lesson" data-lesson="reasons">
+        <div class="lesson-number">04</div>
+        <div class="lesson-body">
+          <p class="lesson-kicker">理由</p>
+          <h3>「理由＋説明」で広げる</h3>
+          <p>理由だけで終わらず、because、具体例、結果のどれかを足すと内容点が上がります。</p>
+          <div class="reason-builder">
+            <p><span>理由</span>Tablets are convenient.</p>
+            <p><span>なぜ？</span>Students can carry many books in one device.</p>
+            <p><span>結果</span>Therefore, their school bags will be lighter.</p>
+          </div>
+          <p class="lesson-tip"><strong>自分への質問：</strong>「なぜ？」「例えば？」「その結果は？」のどれかに答えて1文を足しましょう。</p>
+          <button class="lesson-complete" type="button">この講座を完了</button>
+        </div>
+      </article>
+
+      <article class="writing-lesson" data-lesson="connectors">
+        <div class="lesson-number">05</div>
+        <div class="lesson-body">
+          <p class="lesson-kicker">構成と語彙</p>
+          <h3>つなぎ言葉を使い分ける</h3>
+          <div class="phrase-table" role="table" aria-label="つなぎ言葉一覧">
+            <div role="row"><strong role="cell">順番</strong><span role="cell">First, / Second,</span></div>
+            <div role="row"><strong role="cell">理由</strong><span role="cell">because / since</span></div>
+            <div role="row"><strong role="cell">追加</strong><span role="cell">Also, / In addition,</span></div>
+            <div role="row"><strong role="cell">具体例</strong><span role="cell">For example, / For instance,</span></div>
+            <div role="row"><strong role="cell">対比</strong><span role="cell">However, / Although ...</span></div>
+            <div role="row"><strong role="cell">結果</strong><span role="cell">Therefore, / As a result,</span></div>
+          </div>
+          <p class="lesson-tip">同じ表現を何度も使わず、役割に合わせて3〜5個入れるのが目安です。</p>
+          <button class="lesson-complete" type="button">この講座を完了</button>
+        </div>
+      </article>
+
+      <article class="writing-lesson" data-lesson="review">
+        <div class="lesson-number">06</div>
+        <div class="lesson-body">
+          <p class="lesson-kicker">見直し</p>
+          <h3>最後の3分で4点を守る</h3>
+          <ul class="review-checklist">
+            <li><span>□</span> 80〜100語になっている</li>
+            <li><span>□</span> 意見と異なる理由が2つある</li>
+            <li><span>□</span> 文頭は大文字、文末にはピリオドがある</li>
+            <li><span>□</span> 三人称単数の動詞、単数・複数を確認した</li>
+            <li><span>□</span> 同じ単語を繰り返しすぎていない</li>
+          </ul>
+          <p class="lesson-tip"><strong>おすすめ：</strong>答案を小さな声で読むと、抜けた単語や不自然な文を見つけやすくなります。</p>
+          <button class="lesson-complete" type="button">この講座を完了</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="phrase-bank" aria-labelledby="phraseTitle">
+      <div class="section-heading">
+        <p class="eyebrow">PHRASE BANK</p>
+        <h2 id="phraseTitle">そのまま使える表現集</h2>
+        <p>丸暗記ではなく、自分の意見に単語を入れ替えて使いましょう。</p>
+      </div>
+      <div class="phrase-bank-grid">
+        <article><h3>意見を述べる</h3><p>I think that ...</p><p>In my opinion, ...</p><p>I agree that ...</p><p>I do not think that ...</p></article>
+        <article><h3>理由を説明する</h3><p>One reason is that ...</p><p>This is because ...</p><p>For example, ...</p><p>This will help people ...</p></article>
+        <article><h3>利点を伝える</h3><p>It is useful for people to ...</p><p>People can save time by ...</p><p>This is good for the environment.</p><p>It gives people a chance to ...</p></article>
+        <article><h3>まとめる</h3><p>For these reasons, I believe ...</p><p>Therefore, I think ...</p><p>In conclusion, ...</p><p>Overall, this will benefit ...</p></article>
+      </div>
+    </section>
+
+    <section class="writing-check" aria-labelledby="checkTitle">
+      <div class="section-heading">
+        <p class="eyebrow">QUICK CHECK</p>
+        <h2 id="checkTitle">5問で理解度チェック</h2>
+        <p>講座のポイントを確認してから、100題の練習へ進みましょう。</p>
+      </div>
+      <div id="studyQuiz" class="study-quiz"></div>
+      <div id="studyQuizResult" class="study-quiz-result" hidden></div>
+    </section>
+
+    <section class="study-cta">
+      <div><p class="study-meta">NEXT STEP</p><h2>学んだ型を、実際に使ってみよう。</h2><p>100題から選んで書き、16点満点の無料採点で弱点を確認できます。</p></div>
+      <a class="primary-button link-button" href="writing.html">ライティング練習へ</a>
+    </section>
+  </main>
+  <footer>© 2026 EIKEN STEP</footer>
+</body>
+</html>

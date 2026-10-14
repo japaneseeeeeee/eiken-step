@@ -88,6 +88,7 @@
     const listening = progress.listening || {};
     const writing = progress.writing || {};
     const draftCount = Object.values(writing.drafts || {}).filter((draft) => draft.trim()).length;
+    const studyCount = Array.isArray(writing.studyCompleted) ? writing.studyCompleted.length : 0;
 
     const summaries = {
       vocabProgress: vocabulary.current > 0 || activity?.section === "vocabulary"
@@ -97,7 +98,9 @@
       listenProgressSummary: listening.current > 0 || listening.session
         ? `${listening.current + 1}問目まで学習`
         : "未学習",
-      writingProgress: draftCount > 0 ? `${draftCount}題の下書きを保存` : "未学習"
+      writingProgress: draftCount > 0 || studyCount > 0
+        ? `講座${studyCount}/6・下書き${draftCount}題`
+        : "未学習"
     };
 
     Object.entries(summaries).forEach(([id, text]) => {
