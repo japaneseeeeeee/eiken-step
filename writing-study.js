@@ -1,13 +1,17 @@
 const lessons = [...document.querySelectorAll(".writing-lesson")];
 const writingProgress = window.EikenProgress.read().writing || {};
 const completedLessons = new Set(Array.isArray(writingProgress.studyCompleted) ? writingProgress.studyCompleted : []);
+const studyExercises = { ...(writingProgress.studyExercises || {}) };
+const studyBuilder = { ...(writingProgress.studyBuilder || {}) };
 
 function saveStudyProgress(detail) {
   window.EikenProgress.updateSection(
     "writing",
     {
       studyCompleted: [...completedLessons],
-      studyQuizBest: Number(writingProgress.studyQuizBest) || 0
+      studyQuizBest: Number(writingProgress.studyQuizBest) || 0,
+      studyExercises,
+      studyBuilder
     },
     {
       href: "writing-study.html",
@@ -136,3 +140,113 @@ function showQuizResult() {
 }
 
 renderLessonProgress();
+
+const drillRules = {
+  opinion: {
+    input: document.querySelector("#drillOpinion"),
+    test: (text) => /\b(I think(?: that)?|In my opinion|I (?:agree|disagree))\b/i.test(text),
+    success: "自分の立場がはっきり伝わる文になっています。",
+    retry: "I think that ... などを使って、賛成か反対かを明確にしましょう。"
+  },
+  reason: {
+    input: document.querySelector("#drillReason"),
+    test: (text) => /\bfirst(?:ly)?\b/i.test(text) && /\bbecause\b/i.test(text),
+    success: "First と because で、理由と説明をつなげられています。",
+    retry: "First と because の両方を入れて、理由を詳しく説明しましょう。"
+  },
+  example: {
+    input: document.querySelector("#drillExample"),
+    test: (text) => /\bfor (?:example|instance)\b/i.test(text),
+    success: "具体例を示す表現が正しく使えています。",
+    retry: "文の最初に For example, または For instance, を入れてみましょう。"
+  },
+  conclusion: {
+    input: document.querySelector("#drillConclusion"),
+    test: (text) => /\b(for these reasons|therefore|in conclusion|overall)\b/i.test(text),
+    success: "まとめの合図があり、最後の段落らしい文になっています。",
+    retry: "For these reasons, などのまとめ表現から始めましょう。"
+  }
+};
+
+document.querySelectorAll(".sentence-drill").forEach((drill) => {
+  const id = drill.dataset.drill;
+  const rule = drillRules[id];
+  const feedback = drill.querySelector(".drill-feedback");
+  rule.input.value = studyExercises[id] || "";
+  rule.input.addEventListener("input", () => {
+    studyExercises[id] = rule.input.value;
+    feedback.textContent = "入力内容を自動保存しました。";
+    feedback.className = "drill-feedback";
+    saveStudyProgress(`1文トレーニング ${Object.values(studyExercises).filter((text) => text.trim()).length}/4入力`);
+  });
+  drill.querySelector(".check-drill").addEventListener("click", () => {
+    const text = rule.input.value.trim();
+    if (text.split(/\s+/).filter(Boolean).length < 5) {
+      feedback.textContent = "まずは5語以上の英文を書いてみましょう。";
+      feedback.className = "drill-feedback retry";
+      return;
+    }
+    const passed = rule.test(text);
+    feedback.textContent = passed ? `✓ ${rule.success}` : rule.retry;
+    feedback.className = `drill-feedback ${passed ? "success" : "retry"}`;
+  });
+});
+
+const builderIds = ["builderOpinion", "builderReason1", "builderDetail1", "builderReason2", "builderDetail2", "builderConclusion"];
+const builderFields = builderIds.map((id) => document.querySelector(`#${id}`));
+
+function builderText() {
+  return builderFields.map((field) => field.value.trim()).filter(Boolean).join(" ");
+}
+
+function builderWords(text) {
+  return text ? (text.match(/[A-Za-z]+(?:'[A-Za-z]+)?/g) || []).length : 0;
+}
+
+function renderBuilder() {
+  const text = builderText();
+  const words = builderWords(text);
+  document.querySelector("#builderPreview").textContent = text || "入力した英文がここにつながって表示されます。";
+  document.querySelector("#builderWordCount").textContent = String(words);
+  const guide = document.querySelector("#builderCountGuide");
+  guide.textContent = words < 80 ? `あと${80 - words}語で目標に到達` : words <= 100 ? "目標語数に達しています" : `目標より${words - 100}語多いです`;
+  guide.classList.toggle("on-target", words >= 80 && words <= 100);
+}
+
+builderFields.forEach((field) => {
+  field.value = studyBuilder[field.id] || "";
+  field.addEventListener("input", () => {
+    studyBuilder[field.id] = field.value;
+    renderBuilder();
+    saveStudyProgress(`答案ビルダー ${builderWords(builderText())}語を保存`);
+  });
+});
+
+document.querySelector("#checkBuilder").addEventListener("click", () => {
+  const text = builderText();
+  const words = builderWords(text);
+  const checks = [
+    { ok: builderFields.every((field) => field.value.trim()), label: "6つのマスがすべて書けている" },
+    { ok: words >= 80 && words <= 100, label: `80〜100語に収まっている（現在${words}語）` },
+    { ok: /\bfirst(?:ly)?\b/i.test(text) && /\bsecond(?:ly)?\b/i.test(text), label: "First と Second で理由を整理している" },
+    { ok: /\b(because|for example|for instance|this is because)\b/i.test(text), label: "理由の説明または具体例がある" },
+    { ok: /\b(for these reasons|therefore|in conclusion|overall)\b/i.test(text), label: "最後に意見をまとめている" }
+  ];
+  const feedback = document.querySelector("#builderFeedback");
+  feedback.replaceChildren();
+  const heading = document.createElement("strong");
+  heading.textContent = `${checks.filter((item) => item.ok).length} / ${checks.length}項目クリア`;
+  feedback.appendChild(heading);
+  const list = document.createElement("ul");
+  checks.forEach((item) => {
+    const line = document.createElement("li");
+    line.className = item.ok ? "passed" : "needs-work";
+    line.textContent = `${item.ok ? "✓" : "△"} ${item.label}`;
+    list.appendChild(line);
+  });
+  feedback.appendChild(list);
+  feedback.hidden = false;
+  feedback.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+renderBuilder();

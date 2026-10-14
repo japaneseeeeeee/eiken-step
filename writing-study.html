@@ -159,6 +159,75 @@
       </div>
     </section>
 
+    <section class="writing-practice-lab" aria-labelledby="practiceLabTitle">
+      <div class="section-heading">
+        <p class="eyebrow">WRITE IT YOURSELF</p>
+        <h2 id="practiceLabTitle">実際に書いて練習</h2>
+        <p>短い1文から始めて、最後に80〜100語の答案を組み立てます。入力途中はこの端末に自動保存されます。</p>
+      </div>
+
+      <div class="sentence-drills">
+        <article class="sentence-drill" data-drill="opinion">
+          <div class="drill-head"><span>STEP 1</span><h3>意見を1文で書く</h3></div>
+          <p class="drill-topic">TOPIC：Should students use tablets at school?</p>
+          <label for="drillOpinion">I think ... を使って自分の意見を書きましょう。</label>
+          <textarea id="drillOpinion" rows="2" placeholder="I think that students should ..."></textarea>
+          <div class="drill-actions"><button class="check-drill" type="button">書けたか確認</button><details><summary>ヒント</summary><p>I think that + 主語 + should ...</p></details></div>
+          <p class="drill-feedback" role="status"></p>
+        </article>
+
+        <article class="sentence-drill" data-drill="reason">
+          <div class="drill-head"><span>STEP 2</span><h3>理由と説明を書く</h3></div>
+          <p class="drill-topic">POINT：Convenience</p>
+          <label for="drillReason">First と because を使って理由を書きましょう。</label>
+          <textarea id="drillReason" rows="2" placeholder="First, tablets are convenient because ..."></textarea>
+          <div class="drill-actions"><button class="check-drill" type="button">書けたか確認</button><details><summary>ヒント</summary><p>First, 理由 because 説明.</p></details></div>
+          <p class="drill-feedback" role="status"></p>
+        </article>
+
+        <article class="sentence-drill" data-drill="example">
+          <div class="drill-head"><span>STEP 3</span><h3>具体例を加える</h3></div>
+          <p class="drill-topic">IDEA：One tablet can contain many books.</p>
+          <label for="drillExample">For example を使って具体例を書きましょう。</label>
+          <textarea id="drillExample" rows="2" placeholder="For example, students can ..."></textarea>
+          <div class="drill-actions"><button class="check-drill" type="button">書けたか確認</button><details><summary>ヒント</summary><p>For example, students can carry many books in one device.</p></details></div>
+          <p class="drill-feedback" role="status"></p>
+        </article>
+
+        <article class="sentence-drill" data-drill="conclusion">
+          <div class="drill-head"><span>STEP 4</span><h3>意見をまとめる</h3></div>
+          <p class="drill-topic">GOAL：最初の意見をもう一度伝える</p>
+          <label for="drillConclusion">For these reasons ... でまとめましょう。</label>
+          <textarea id="drillConclusion" rows="2" placeholder="For these reasons, I believe ..."></textarea>
+          <div class="drill-actions"><button class="check-drill" type="button">書けたか確認</button><details><summary>ヒント</summary><p>For these reasons, I believe students should use tablets at school.</p></details></div>
+          <p class="drill-feedback" role="status"></p>
+        </article>
+      </div>
+
+      <article class="essay-builder" aria-labelledby="builderTitle">
+        <div class="builder-heading">
+          <div><p class="study-meta">GUIDED WRITING</p><h3 id="builderTitle">答案ビルダー</h3></div>
+          <div class="builder-word-count"><strong id="builderWordCount">0</strong><span>words</span></div>
+        </div>
+        <div class="builder-topic"><span>TOPIC</span><strong>Should students use tablets instead of textbooks at school?</strong></div>
+        <p class="builder-guide">下の6マスを英語で埋めると、1つの答案になります。目標は80〜100語です。</p>
+        <div class="builder-fields">
+          <label><span>1. 意見</span><textarea id="builderOpinion" rows="2" placeholder="I think that students should ..."></textarea></label>
+          <label><span>2. 理由1</span><textarea id="builderReason1" rows="2" placeholder="First, ..."></textarea></label>
+          <label><span>3. 理由1の説明・具体例</span><textarea id="builderDetail1" rows="2" placeholder="This is because ... / For example, ..."></textarea></label>
+          <label><span>4. 理由2</span><textarea id="builderReason2" rows="2" placeholder="Second, ..."></textarea></label>
+          <label><span>5. 理由2の説明・具体例</span><textarea id="builderDetail2" rows="2" placeholder="Also, ... / For instance, ..."></textarea></label>
+          <label><span>6. まとめ</span><textarea id="builderConclusion" rows="2" placeholder="For these reasons, I believe ..."></textarea></label>
+        </div>
+        <div class="builder-preview-wrap">
+          <div class="editor-head"><strong>つなげた答案</strong><span id="builderCountGuide">あと80語で目標に到達</span></div>
+          <p id="builderPreview" class="builder-preview">入力した英文がここにつながって表示されます。</p>
+        </div>
+        <button id="checkBuilder" class="primary-button full-button" type="button">構成をチェックする</button>
+        <div id="builderFeedback" class="builder-feedback" role="status" hidden></div>
+      </article>
+    </section>
+
     <section class="writing-check" aria-labelledby="checkTitle">
       <div class="section-heading">
         <p class="eyebrow">QUICK CHECK</p>
