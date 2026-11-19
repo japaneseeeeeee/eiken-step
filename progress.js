@@ -6,7 +6,7 @@
       version: 1,
       updatedAt: null,
       lastActivity: null,
-      vocabulary: { current: 0, total: 1500 },
+      vocabulary: { current: 0, total: 1500, testAnswered: 0, testCorrect: 0, testBest: 0, testLastIds: [], testSession: null },
       quiz: { answered: 0, correct: 0, bestScore: 0, lastQuestionIds: [], session: null },
       listening: { current: 0, total: 115, mode: "practice", session: null },
       writing: { promptIndex: 0, drafts: {} }
@@ -91,8 +91,8 @@
     const studyCount = Array.isArray(writing.studyCompleted) ? writing.studyCompleted.length : 0;
 
     const summaries = {
-      vocabProgress: vocabulary.current > 0 || activity?.section === "vocabulary"
-        ? `${vocabulary.current + 1}番まで学習`
+      vocabProgress: vocabulary.current > 0 || Number(vocabulary.testAnswered) > 0 || activity?.section === "vocabulary"
+        ? `カード${vocabulary.current + 1}番・テスト正答${Number(vocabulary.testCorrect) || 0}/${Number(vocabulary.testAnswered) || 0}`
         : "未学習",
       quizProgress: quiz.answered > 0 ? `累計${quiz.answered}問・正答${quiz.correct}問` : "未学習",
       listenProgressSummary: listening.current > 0 || listening.session
